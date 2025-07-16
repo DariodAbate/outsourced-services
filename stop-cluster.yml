@@ -1,0 +1,10 @@
+- name: Stop etcd cluster
+  hosts: etcd_nodes
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Include etcd stop tasks
+      ansible.builtin.include_role:
+        name: etcd
+        tasks_from: stop.yml

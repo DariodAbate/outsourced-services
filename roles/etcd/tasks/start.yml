@@ -1,0 +1,6 @@
+- name: Start and enable service
+  become: true
+  ansible.builtin.systemd_service:
+    name: etcd
+    enabled: true
+    state: started

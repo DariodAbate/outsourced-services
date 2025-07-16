@@ -1,0 +1,6 @@
+- name: Deploy etcd cluster
+  hosts: etcd_nodes
+  vars_files:
+    - vars.yml
+  roles:
+    - etcd

@@ -1,0 +1,6 @@
+etcd_node_ips:
+  - 10.10.101.16
+  - 10.10.101.17
+  - 10.10.101.18
+
+etcd_cluster_token: "etcd-cluster-1"

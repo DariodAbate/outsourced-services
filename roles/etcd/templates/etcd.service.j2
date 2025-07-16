@@ -1,0 +1,23 @@
+[Unit]
+Description=etcd service
+Documentation=https://github.com/etcd-io/etcd
+After=network.target
+
+[Service]
+User=etcd
+Type=notify
+ExecStart=/usr/local/bin/etcd \
+  --name={{ inventory_hostname }} \
+  --data-dir=/var/lib/etcd \
+  --initial-advertise-peer-urls=http://{{ ansible_host }}:2380 \
+  --listen-peer-urls=http://0.0.0.0:2380 \
+  --advertise-client-urls=http://{{ ansible_host }}:2379 \
+  --listen-client-urls=http://0.0.0.0:2379 \
+  --initial-cluster={% for ip in etcd_node_ips %}{{ hostvars[groups['etcd_nodes'][loop.index0]].inventory_hostname }}=http://{{ ip }}:2380{% if not loop.last %},{% endif %}{% endfor %} \
+  --initial-cluster-token={{ etcd_cluster_token }} \
+  --initial-cluster-state=new
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
