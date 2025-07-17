@@ -19,3 +19,11 @@
             name: scylla
             tasks_from: stop.yml
       tags: scylla
+
+    - name: Stop redpanda block
+      block:
+        - name: Include redpanda stop tasks
+          ansible.builtin.include_role:
+            name: redpanda
+            tasks_from: stop.yml
+      tags: redpanda

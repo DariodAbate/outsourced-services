@@ -4,3 +4,8 @@ etcd_node_ips:
   - 10.10.101.18
 
 etcd_cluster_token: "etcd-cluster-1"
+
+redpanda_data_directory: /var/lib/redpanda/data
+redpanda_rpc_port: 33145
+redpanda_kafka_port: 9092
+redpanda_admin_port: 9644

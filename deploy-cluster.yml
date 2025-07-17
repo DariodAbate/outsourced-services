@@ -19,3 +19,11 @@
             name: scylla
             tasks_from: deploy.yml
       tags: scylla
+
+    - name: Deploy redpanda block
+      block:
+        - name: Deploy redpanda
+          ansible.builtin.include_role:
+            name: redpanda
+            tasks_from: deploy.yml
+      tags: redpanda

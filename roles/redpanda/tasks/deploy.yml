@@ -1,0 +1,38 @@
+- name: Install Redpanda
+  become: true
+  ansible.builtin.shell:
+    cmd: "curl -1sLf 'https://dl.redpanda.com/nzc4ZYQK3WRGd9sy/redpanda/cfg/setup/bash.deb.sh' | bash && apt-get install -y redpanda"
+  args:
+    creates: /usr/bin/rpk
+
+- name: Create Redpanda data directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ redpanda_data_directory }}"
+    state: directory
+    owner: redpanda
+    group: redpanda
+    mode: '0755'
+
+- name: Deploy configuration from template
+  become: true
+  ansible.builtin.template:
+    src: redpanda.yaml.j2
+    dest: /etc/redpanda/redpanda.yaml
+    owner: redpanda
+    group: redpanda
+    mode: '0644'
+
+- name: Tune Kernel
+  become: true
+  ansible.builtin.command: "{{ item }}"
+  loop:
+    - rpk redpanda mode production
+    - rpk redpanda tune all
+  changed_when: false
+
+- name: Enable tuner service
+  become: true
+  ansible.builtin.systemd_service:
+    name: redpanda-tuner
+    enabled: true
