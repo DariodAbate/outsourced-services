@@ -1,0 +1,83 @@
+- name: Create the APT keyrings directory
+  become: true
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+- name: Add the ScyllaDB GPG key
+  become: true
+  ansible.builtin.shell:
+    cmd: "gpg --homedir /tmp --no-default-keyring --keyring /etc/apt/keyrings/scylladb.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys a43e06657bac99e3"
+    creates: /etc/apt/keyrings/scylladb.gpg
+
+- name: Add the ScyllaDB APT repository source file
+  become: true
+  ansible.builtin.get_url:
+    url: "http://downloads.scylladb.com/deb/debian/scylla-2025.2.list"
+    dest: /etc/apt/sources.list.d/scylla.list
+    mode: '0644'
+
+- name: Install ScyllaDB and Java 11
+  become: true
+  ansible.builtin.apt:
+    name:
+      - scylla
+      - openjdk-11-jre-headless
+    state: present
+    update_cache: true
+
+- name: Set Java 11 as the default
+  become: true
+  ansible.builtin.command:
+    cmd: "update-java-alternatives --jre-headless -s java-1.11.0-openjdk-amd64"
+  register: java_update_status
+  changed_when: "'Setting' in java_update_status.stdout"
+
+- name: Create Scylla configuration file from template
+  become: true
+  ansible.builtin.template:
+    src: scylla.yaml.j2
+    dest: /etc/scylla/scylla.yaml
+    owner: scylla
+    group: scylla
+    mode: '0644'
+
+- name: Create the ScyllaDB data directory
+  become: true
+  ansible.builtin.file:
+    path: /var/lib/scylla/data
+    state: directory
+    owner: scylla
+    group: scylla
+    mode: '0755'
+
+- name: Create the ScyllaDB configuration includes directory
+  become: true
+  ansible.builtin.file:
+    path: /etc/scylla.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Run Scylla cpuset setup to generate cpuset.conf
+  become: true
+  ansible.builtin.command:
+    cmd: "/usr/sbin/scylla_cpuset_setup --smp {{ ansible_processor_vcpus }}"
+  register: scylla_cpuset_status
+  changed_when: "'Updated' in scylla_cpuset_status.stdout"
+
+- name: Set Scylla developer mode to disabled
+  become: true
+  ansible.builtin.command:
+    cmd: /usr/sbin/scylla_dev_mode_setup --developer-mode 0
+  register: scylla_dev_mode_status
+  changed_when: "'Updated' in scylla_dev_mode_status.stdout"
+
+- name: Run Scylla setup utility
+  become: true
+  ansible.builtin.command:
+    cmd: /usr/sbin/scylla_setup --no-kernel-check --no-raid-setup
+  register: scylla_setup_status
+  changed_when: "'Setup finished' in scylla_setup_status.stdout"

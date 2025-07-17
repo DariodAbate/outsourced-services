@@ -1,0 +1,16 @@
+cluster_name: 'main_cluster'
+
+seed_provider:
+  - class_name: org.apache.cassandra.locator.SimpleSeedProvider
+    parameters:
+      - seeds: "{{ etcd_node_ips[0] }}"
+
+listen_address: {{ ansible_host }}
+
+rpc_address: {{ ansible_host }}
+
+api_address: {{ ansible_host }}
+
+native_transport_port: 9042
+
+start_native_transport: true

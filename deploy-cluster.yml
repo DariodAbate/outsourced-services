@@ -1,0 +1,21 @@
+- name: Deploy services
+  hosts: etcd_nodes
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Deploy etcd block
+      block:
+      - name: Deploy etcd
+        ansible.builtin.include_role:
+          name: etcd
+          tasks_from: deploy.yml
+      tags: etcd
+
+    - name: Deploy ScyllaDB block
+      block:
+        - name: Deploy ScyllaDB
+          ansible.builtin.include_role:
+            name: scylla
+            tasks_from: deploy.yml
+      tags: scylla

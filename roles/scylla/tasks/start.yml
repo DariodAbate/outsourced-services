@@ -1,0 +1,8 @@
+- name:  Enable and start the scylla-server service
+  become: true
+  ansible.builtin.systemd_service:
+    name: scylla-server
+    enabled: true
+    state: started
+  throttle: 1 # Node joining has to be sequential!
+    

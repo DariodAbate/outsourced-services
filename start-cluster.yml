@@ -1,10 +1,21 @@
-- name: Start etcd cluster
+- name: Start services
   hosts: etcd_nodes
   vars_files:
     - vars.yml
-
+    
   tasks:
-    - name: Include etcd start tasks
-      ansible.builtin.include_role:
-        name: etcd
-        tasks_from: start.yml
+    - name: Start etcd block
+      block:
+        - name: Include etcd start tasks
+          ansible.builtin.include_role:
+            name: etcd
+            tasks_from: start.yml
+      tags: etcd
+
+    - name: Start ScyllaDB block
+      block:
+        - name: Include ScyllaDB start tasks
+          ansible.builtin.include_role:
+            name: scylla
+            tasks_from: start.yml
+      tags: scylla
