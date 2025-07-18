@@ -64,7 +64,7 @@
 - name: Run Scylla cpuset setup to generate cpuset.conf
   become: true
   ansible.builtin.command:
-    cmd: "/usr/sbin/scylla_cpuset_setup --smp {{ ansible_processor_vcpus }}"
+    cmd: "/usr/sbin/scylla_cpuset_setup --smp 4"
   register: scylla_cpuset_status
   changed_when: "'Updated' in scylla_cpuset_status.stdout"
 
@@ -81,3 +81,11 @@
     cmd: /usr/sbin/scylla_setup --no-kernel-check --no-raid-setup
   register: scylla_setup_status
   changed_when: "'Setup finished' in scylla_setup_status.stdout"
+
+- name: Add memory limit to existing ScyllaDB arguments
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/default/scylla-server
+    regexp: '^(SCYLLA_ARGS=".*)"$'
+    line: '\1 --memory 8G"'
+    backrefs: true
